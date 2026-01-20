@@ -6,6 +6,7 @@ export async function PATCH(
   req: Request,
   { params }: { params: { taskId: string } }
 ) {
+  
   const auth = await getAuthUser()
   if (!auth) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
@@ -21,15 +22,17 @@ export async function PATCH(
     return NextResponse.json({ message: "Task not found" }, { status: 404 })
   }
 
-  // MEMBER can only update own task
-  if (auth.role === "MEMBER" && task.assigneeId !== auth.userId) {
+  const isOwner = task.assigneeId === auth.userId
+  const isAdmin = auth.role === "ADMIN" || auth.role === "MANAGER"
+
+  if (!isOwner && !isAdmin) {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 })
   }
 
-  const updated = await prisma.task.update({
+  await prisma.task.update({
     where: { id: params.taskId },
     data: { status },
   })
 
-  return NextResponse.json(updated)
+  return NextResponse.json({ success: true })
 }

@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import TaskStatusUpdater from "./task-status-update"
 import AssignTask from "./task-assign"
+import TaskStatus from "./task-status-update"
 
 export default function TaskList({
   projectId,
@@ -30,18 +30,22 @@ export default function TaskList({
 
             {t.assignee && (
               <div className="text-sm text-gray-500">
-                Assigned to: {t.assignee.name}
+                Assigned to: <strong>{t.assignee.name}</strong>
               </div>
             )}
 
-            <TaskStatusUpdater
-              task={t}
-              role={role}
-              userId={userId}
+            <TaskStatus
+              projectId={projectId}
+              taskId={t.id}
+              status={t.status}
+              canEdit={
+                t.role !== "MEMBER" || t.assigneeId === t.userId
+              }
             />
 
             {(role === "ADMIN" || role === "MANAGER") && (
               <AssignTask
+                projectId={projectId}
                 taskId={t.id}
                 members={members}
               />

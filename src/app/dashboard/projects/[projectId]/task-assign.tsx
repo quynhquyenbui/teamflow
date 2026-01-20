@@ -8,16 +8,18 @@ type Member = {
 }
 
 export default function AssignTask({
+  projectId,
   taskId,
   members,
 }: {
+  projectId: string
   taskId: string
   members: Member[]
 }) {
   async function assign(userId: string) {
     if (!userId) return
 
-    await fetch(`/api/tasks/${taskId}/assign`, {
+    await fetch(`/api/projects/${projectId}/tasks/${taskId}/assign`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId }),
@@ -30,7 +32,6 @@ export default function AssignTask({
     <div className="mt-2">
       <select
         className="border rounded px-2 py-1 text-sm"
-        defaultValue=""
         onChange={(e) => assign(e.target.value)}
       >
         <option value="">Assign to…</option>

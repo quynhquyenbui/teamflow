@@ -1,32 +1,39 @@
 "use client"
 
-export default function TaskStatusUpdater({
-  task,
-  role,
-  userId,
-}: any) {
-  const canUpdate =
-    role !== "MEMBER" || task.assigneeId === userId
+export default function TaskStatus({
+projectId,
+taskId,
+status,
+canEdit,
+}: {
+projectId: string
+taskId: string
+status: string
+canEdit: boolean
+}) {
+async function update(nextStatus: string) {
+await fetch(`/api/projects/${projectId}/tasks/${taskId}/status`, {
+method: "PATCH",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ status: nextStatus }),
+})
 
-  if (!canUpdate) return null
+location.reload()
 
-  async function update(status: string) {
-    await fetch(`/api/tasks/${task.id}/status`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    })
+}
 
-    location.reload()
-  }
+if (!canEdit) {
+return ( <span className="text-xs text-gray-500">Status: {status}</span>
+)
+}
 
-  return (
-    <div className="mt-2 space-x-2">
-      <button onClick={() => update("TODO")}>Todo</button>
-      <button onClick={() => update("IN_PROGRESS")}>
-        In Progress
-      </button>
-      <button onClick={() => update("DONE")}>Done</button>
-    </div>
-  )
+return (
+<select
+className="border text-xs px-2 py-1 rounded"
+value={status}
+onChange={(e) => update(e.target.value)}>
+    <option value="TODO">TODO</option>
+    <option value="IN_PROGRESS">IN PROGRESS</option>
+    <option value="DONE">DONE</option> </select>
+)
 }
